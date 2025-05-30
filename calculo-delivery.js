@@ -180,7 +180,7 @@ async function enviarResumoWhatsApp() {
 
     mensagem += `${entregador}:\n`;
     mensagem += `${corridas.length} corridas\n`;
-    mensagem += `Total: R$ ${totalEntregador.toFixed(2).replace('.', ',')}\n\n`;
+    mensagem += `Total: R$ ${totalEntregador.toFixed(2).replace('.', ',')}`;
   }
 
   const texto = encodeURIComponent(mensagem);
