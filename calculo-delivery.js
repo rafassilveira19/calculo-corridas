@@ -139,10 +139,10 @@ async function excluirCorrida(id) {
 
 async function enviarResumoWhatsApp() {
   const hoje = new Date();
-  hoje.setHours(0, 0, 0, 0); 
+  hoje.setHours(0, 0, 0, 0);
 
   const amanha = new Date(hoje);
-  amanha.setDate(hoje.getDate() + 1); 
+  amanha.setDate(hoje.getDate() + 1);
 
   const snapshot = await db.collection('corridas')
     .where('dataHora', '>=', hoje.getTime())
@@ -158,9 +158,10 @@ async function enviarResumoWhatsApp() {
   const agrupamento = {};
 
   snapshot.forEach(doc => {
-    const entregador = doc.data().entregador;
-    const valorCliente = doc.data().valorCliente;
-    const valorEntregador = calcularValorEntregador(valorCliente);
+    const data = doc.data();
+    const entregador = data.entregador;
+    const valorCliente = data.valorCliente;
+    const valorEntregador = data.valorEntregador;
 
     if (!agrupamento[entregador]) agrupamento[entregador] = [];
 
@@ -179,7 +180,7 @@ async function enviarResumoWhatsApp() {
 
     mensagem += `${entregador}:\n`;
     mensagem += `${corridas.length} corridas\n`;
-    mensagem += `Total: R$ ${totalEntregador.toFixed(2).replace('.', ',')}`;
+    mensagem += `Total: R$ ${totalEntregador.toFixed(2).replace('.', ',')}\n\n`;
   }
 
   const texto = encodeURIComponent(mensagem);
@@ -187,8 +188,6 @@ async function enviarResumoWhatsApp() {
   window.open(url, '_blank');
 }
 
-
-// Eventos
 document.getElementById('btnEnviarWhatsApp').addEventListener('click', enviarResumoWhatsApp);
 window.onload = () => {
   criarBotoes();
