@@ -1,0 +1,126 @@
+body {
+  font-family: Arial, sans-serif;
+  max-width: 700px;
+  margin: 20px auto;
+  padding: 0 20px;
+  background-color: #f9f9f9;
+  color: #333;
+}
+
+h1 {
+  text-align: center;
+  color: #2c3e50;
+  margin-bottom: 25px;
+}
+
+label {
+  display: block;
+  margin-top: 15px;
+  font-weight: bold;
+  color: #34495e;
+}
+
+input[type="text"] {
+  width: 100%;
+  max-width: 300px;
+  padding: 8px 10px;
+  margin-top: 5px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease;
+}
+
+input[type="text"]:focus {
+  border-color: #4CAF50;
+  outline: none;
+}
+
+#botoesValores {
+  margin-top: 15px;
+}
+
+#botoesValores button {
+  margin: 5px 5px 5px 0;
+  padding: 8px 14px;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 5px;
+  border: 1px solid #4CAF50;
+  background-color: white;
+  color: #4CAF50;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+#botoesValores button:hover {
+  background-color: #4CAF50;
+  color: white;
+}
+
+button#btnValorManual,
+button#btnEnviarWhatsApp {
+  margin-top: 15px;
+  padding: 10px 18px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 5px;
+  border: none;
+  background-color: #27ae60;
+  color: white;
+  transition: background-color 0.3s ease;
+  display: block;
+  max-width: 200px;
+}
+
+button#btnValorManual:hover,
+button#btnEnviarWhatsApp:hover {
+  background-color: #219150;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 30px;
+  background-color: white;
+  box-shadow: 0 0 8px rgba(0,0,0,0.1);
+}
+
+th, td {
+  padding: 10px 15px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+th {
+  background-color: #4CAF50;
+  color: white;
+  font-weight: normal;
+}
+
+td button {
+  padding: 5px 10px;
+  background-color: #e74c3c;
+  border: none;
+  border-radius: 4px;
+  color: white;
+  cursor: pointer;
+  font-size: 13px;
+  transition: background-color 0.2s ease;
+}
+
+td button:hover {
+  background-color: #c0392b;
+}
+
+#resumo {
+  margin-top: 30px;
+  background-color: white;
+  padding: 15px;
+  border-radius: 6px;
+  box-shadow: 0 0 6px rgba(0,0,0,0.1);
+  color: #34495e;
+  font-size: 16px;
+  white-space: pre-wrap;
+}
