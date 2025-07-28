@@ -55,7 +55,7 @@ async function adicionarCorridaPorBotao(valorCliente, usarValorDireto = false) {
       entregador: nome,
       valorCliente: valor,
       valorEntregador,
-      dataHora: new Date().getTime()
+      dataHora: (dataSelecionada ? dataSelecionada.getTime() : new Date().getTime())
     });
     carregarCorridas();
   } catch (err) {
@@ -93,43 +93,48 @@ async function carregarCorridas() {
     return;
   }
 
-  const agrupado = {};
+  const porMes = {}; // Agrupamento por mês/ano
+  const entregadoresResumo = {}; // Para o resumo por entregador
+
   snapshot.forEach(doc => {
     const d = doc.data();
     const data = new Date(d.dataHora);
+    const mesAno = `${String(data.getMonth() + 1).padStart(2, '0')}/${data.getFullYear()}`;
+
+    if (!porMes[mesAno]) porMes[mesAno] = [];
+    porMes[mesAno].push({ ...d, id: doc.id });
+
     const dia = data.toLocaleDateString('pt-BR');
-    const ent = d.entregador;
-    if (!agrupado[ent]) agrupado[ent] = {};
-    if (!agrupado[ent][dia]) agrupado[ent][dia] = [];
-    agrupado[ent][dia].push({ ...d, id: doc.id });
+    if (!entregadoresResumo[d.entregador]) entregadoresResumo[d.entregador] = {};
+    if (!entregadoresResumo[d.entregador][dia]) entregadoresResumo[d.entregador][dia] = [];
+    entregadoresResumo[d.entregador][dia].push(d);
   });
 
-  snapshot.forEach(doc => {
-    const d = doc.data();
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${formatarDataHora(new Date(d.dataHora))}</td>
-      <td>${d.entregador}</td>
-      <td>R$ ${d.valorCliente.toFixed(2).replace('.', ',')}</td>
-      <td>R$ ${d.valorEntregador.toFixed(2).replace('.', ',')}</td>
-      <td><button onclick="excluirCorrida('${doc.id}')">Excluir</button></td>
-    `;
-    tbody.appendChild(tr);
+  // Criar abas dos meses
+  const resumoDiv = document.getElementById('resumo');
+  let htmlResumo = '<h3>Corridas por Mês</h3>';
+  htmlResumo += '<div id="abasMeses">';
+
+  const meses = Object.keys(porMes).sort((a, b) => {
+    const [ma, aa] = a.split('/').map(Number);
+    const [mb, ab] = b.split('/').map(Number);
+    return ab !== aa ? ab - aa : mb - ma;
   });
 
-  let htmlResumo = '<h3>Resumo</h3>';
-  for (const entregador in agrupado) {
-    htmlResumo += `<h4>${entregador}</h4><ul>`;
-    for (const dia in agrupado[entregador]) {
-      const corridas = agrupado[entregador][dia];
-      const totalCli = corridas.reduce((s, c) => s + c.valorCliente, 0);
-      const totalEnt = corridas.reduce((s, c) => s + c.valorEntregador, 0);
-      htmlResumo += `<li>${dia}: ${corridas.length} corridas - Cliente: R$ ${totalCli.toFixed(2).replace('.', ',')} - Entregador: R$ ${totalEnt.toFixed(2).replace('.', ',')}</li>`;
-    }
-    htmlResumo += '</ul>';
-  }
-  document.getElementById('resumo').innerHTML = htmlResumo;
+  meses.forEach((mes, i) => {
+    htmlResumo += `<button class="abaMes" onclick="mostrarTabelaMes('${mes}')">${mes}</button>`;
+  });
+
+  htmlResumo += '</div><div id="conteudoMes"></div>';
+  resumoDiv.innerHTML = htmlResumo;
+
+  // Guardar corridas em window para trocar de aba
+  window._corridasPorMes = porMes;
+
+  // Mostrar o primeiro mês automaticamente
+  if (meses.length) mostrarTabelaMes(meses[0]);
 }
+
 
 async function excluirCorrida(id) {
   if (!confirm('Excluir esta corrida?')) return;
@@ -180,7 +185,7 @@ async function enviarResumoWhatsApp() {
 
     mensagem += `${entregador}:\n`;
     mensagem += `${corridas.length} corridas\n`;
-    mensagem += `Total: R$ ${totalEntregador.toFixed(2).replace('.', ',')}`;
+    mensagem += `Total: R$ ${totalEntregador.toFixed(2).replace('.', ',')}\n\n`;
   }
 
   const texto = encodeURIComponent(mensagem);
@@ -188,8 +193,119 @@ async function enviarResumoWhatsApp() {
   window.open(url, '_blank');
 }
 
+let dataSelecionada = null;
+
+const inputData = document.getElementById('dataCorrida');
+inputData.addEventListener('change', () => {
+  const valor = inputData.value;
+  if (valor) {
+    const agora = new Date();
+    const [ano, mes, dia] = valor.split('-').map(Number);
+
+    dataSelecionada = new Date(ano, mes - 1, dia, agora.getHours(), agora.getMinutes(), agora.getSeconds());
+  } else {
+    dataSelecionada = null;
+  }
+});
+
+
+
 document.getElementById('btnEnviarWhatsApp').addEventListener('click', enviarResumoWhatsApp);
 window.onload = () => {
   criarBotoes();
   carregarCorridas();
 };
+function mostrarTabelaMes(mesSelecionado) {
+  const conteudo = document.getElementById('conteudoMes');
+  const corridas = window._corridasPorMes[mesSelecionado] || [];
+
+  if (!corridas.length) {
+    conteudo.innerHTML = '<p>Nenhuma corrida neste mês.</p>';
+    return;
+  }
+
+
+  const resumoPorEntregador = {};
+  corridas.forEach(d => {
+    const data = new Date(d.dataHora);
+    const dia = data.toLocaleDateString('pt-BR');
+    const ent = d.entregador;
+
+    if (!resumoPorEntregador[ent]) resumoPorEntregador[ent] = {};
+    if (!resumoPorEntregador[ent][dia]) resumoPorEntregador[ent][dia] = [];
+
+    resumoPorEntregador[ent][dia].push(d);
+  });
+
+  let html = `<h4> ${mesSelecionado}</h4>`;
+
+
+  html += `<div style="margin-bottom: 15px;"><h5>Resumo por entregador</h5>`;
+  for (const entregador in resumoPorEntregador) {
+    html += `<strong>${entregador}</strong><ul>`;
+    for (const dia in resumoPorEntregador[entregador]) {
+      const grupo = resumoPorEntregador[entregador][dia];
+      const totalCliente = grupo.reduce((acc, item) => acc + item.valorCliente, 0);
+      const totalEntregador = grupo.reduce((acc, item) => acc + item.valorEntregador, 0);
+      html += `<li><b>${dia}:</b> ${grupo.length} corridas - Cliente: R$ ${totalCliente.toFixed(2).replace('.', ',')} <b>- Entregador: R$ ${totalEntregador.toFixed(2).replace('.', ',')}</b></li>`;
+    }
+    html += '</ul>';
+  }
+  html += `</div>`;
+
+  html += `<button id="toggleTabela" class="btnMostrarTodas">Mostrar todas as corridas do mês</button>`;
+
+
+  html += `<div id="tabelaCompleta" style="display:none;"></div>`;
+
+  conteudo.innerHTML = html;
+
+
+  function montarTabelaCompleta() {
+    let tabela = `
+      <table border="1" cellpadding="5" cellspacing="0" style="margin-top: 10px; width: 100%;">
+        <thead>
+          <tr>
+            <th>Data e Hora</th>
+            <th>Entregador</th>
+            <th>Cliente (R$)</th>
+            <th>Entregador (R$)</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    corridas.forEach(d => {
+      const dataHora = formatarDataHora(new Date(d.dataHora));
+      tabela += `
+        <tr>
+          <td>${dataHora}</td>
+          <td>${d.entregador}</td>
+          <td>R$ ${d.valorCliente.toFixed(2).replace('.', ',')}</td>
+          <td>R$ ${d.valorEntregador.toFixed(2).replace('.', ',')}</td>
+          <td><button onclick="excluirCorrida('${d.id}')">Excluir</button></td>
+        </tr>
+      `;
+    });
+
+    tabela += '</tbody></table>';
+    return tabela;
+  }
+
+  const btnToggle = document.getElementById('toggleTabela');
+  const divTabela = document.getElementById('tabelaCompleta');
+
+  btnToggle.addEventListener('click', () => {
+    if (divTabela.style.display === 'none') {
+      divTabela.innerHTML = montarTabelaCompleta();
+      divTabela.style.display = 'block';
+      btnToggle.innerText = 'Ocultar todas as corridas do mês';
+    } else {
+      divTabela.style.display = 'none';
+      btnToggle.innerText = 'Mostrar todas as corridas do mês';
+    }
+  });
+}
+
+
