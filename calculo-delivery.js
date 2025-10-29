@@ -13,7 +13,7 @@ const db = firebase.firestore();
 const tabelaValores = [
 { cliente: 7.50, entregador: 6.50 },
   { cliente: 9.00, entregador: 7.50 },
-  { cliente: 10.00 entregador: 8.50 },
+  { cliente: 10.00, entregador: 8.50 },
  { cliente: 11.50, entregador: 10.00 },
   { cliente: 13.50, entregador: 11.50 },
    { cliente: 14.00, entregador: 12.50 },
@@ -308,6 +308,7 @@ function mostrarTabelaMes(mesSelecionado) {
     }
   });
 }
+
 
 
 
