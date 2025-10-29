@@ -11,17 +11,18 @@ const db = firebase.firestore();
 
 
 const tabelaValores = [
-  { cliente: 7.00, entregador: 6.00 },
-  { cliente: 8.50, entregador: 7.00 },
-  { cliente: 9.50, entregador: 8.00 },
-  { cliente: 11.00, entregador: 9.50 },
-  { cliente: 12.50, entregador: 10.50 },
-  { cliente: 13.00, entregador: 11.50 },
-  { cliente: 14.00, entregador: 12.00 },
-  { cliente: 15.00, entregador: 13.00 },
-  { cliente: 16.00, entregador: 14.50 },
-  { cliente: 17.00, entregador: 15.00 },
-  { cliente: 20.00, entregador: 18.00 }
+{ cliente: 7.50, entregador: 6.50 },
+  { cliente: 9.00, entregador: 7.50 },
+  { cliente: 10.00 entregador: 8.50 },
+ { cliente: 11.50, entregador: 10.00 },
+  { cliente: 13.50, entregador: 11.50 },
+   { cliente: 14.00, entregador: 12.50 },
+   { cliente: 15.00, entregador: 13.00 },
+   { cliente: 16.00, entregador: 14.00 },
+  { cliente: 17.00, entregador: 15.50 },
+ { cliente: 18.00, entregador: 16.00 },
+ { cliente: 19.00, entregador: 17.00 },
+  { cliente: 20.00, entregador: 18.00 }
 ];
 
 function calcularValorEntregador(valorCliente, usarValorDireto) {
@@ -307,5 +308,6 @@ function mostrarTabelaMes(mesSelecionado) {
     }
   });
 }
+
 
 
